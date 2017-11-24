@@ -4,7 +4,7 @@
 
 Copyright (c) 2014-2015 Benoît Chesneau.
 
-__Version:__ 2.0.0
+__Version:__ 3.0.0
 
 hlc implements the Hybrid Logical Clock outlined in [Logical Physical Clocks
 and Consistent Snapshots in Globally Distributed
@@ -27,12 +27,17 @@ Full doc is available in the [`hlc`](hlc.md) module.
 Create a logical clock using `hlc:new/0`:
 
 ```
-C = hlc:new()
+1> {ok, C} = hlc:start_link().
+{ok,<0.158.0>}
+```
+Return a timestamp for the current time:
+
+```
+2> Now = hlc:now(C).
+{timestamp,1511564016030,0}
 ```
 
-> By default, it is using the physical clock (`erlang:timestamp/0` or `erlang:now/0` on old systems) , but you
-> can use `hlc:new/1` to pass a function and use your own clock. Make sure to use the correct [time warp
-> mode](http://www.erlang.org/doc/apps/erts/time_correction.html#Time_Warp) for your system.
+> Note: by default it using `erlang:system_time(millisecond)` to get the physical time.
 
 You can update the current clock from the members of the cluster using `hlc:update/2`.
 
@@ -47,7 +52,7 @@ Ex, compare if A is inferior to B:
 
 ```
 {MClock, MClockFun} = hlc:manual_clock(),
-C = hlc:new(MClockFun),
+{ok, C} = hlc:start_link(MClockFun, 0),
 
 A = hlc:timestamp(C),
 B = hlc:timestamp(C),
@@ -55,11 +60,25 @@ B = hlc:timestamp(C),
 ?assert(A =:= B),
 
 hlc:set_manual_clock(MClock, 1),
-{B1, C2} = hlc:now(C),
+B1 = hlc:now(C),
 true = hlc:less(A, B1).
 ```
 
 To test if they are equal use `hlc:ts_equal/2`.
+
+## Performance
+
+You can check the performance using the module `hlc_harness`:
+
+```erlang
+> hlc_harness:timed_generate(10000).
+generating timestamp: 0.035 s
+...
+> hlc_harness:timed_generate(100000).
+generating timestamp: 0.295 s
+...
+> hlc_harness:timed_generate(1000000).
+generating timestamp: 2.586 s`''
 
 ## Ownership and License
 
@@ -85,4 +104,13 @@ To  run the test suite:
 ```
 make test
 ```
+
+
+
+## Modules ##
+
+
+<table width="100%" border="0" summary="list of modules">
+<tr><td><a href="hlc.md" class="module">hlc</a></td></tr>
+<tr><td><a href="hlc_harness.md" class="module">hlc_harness</a></td></tr></table>
 

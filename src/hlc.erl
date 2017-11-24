@@ -23,8 +23,8 @@
 
 
 -export([
-  start_link/2, start_link/3,
-  start/2, start/3,
+  start_link/0, start_link/2, start_link/3,
+  start/0, start/2, start/3,
   stop/1,
   now/1,
   update/2,
@@ -78,6 +78,9 @@
 }).
 
 
+%% @doc start a new hybrid logical clock with physical clock and maxoffset=0
+-spec start_link() -> {ok, clock()}.
+start_link() -> start_link(fun physical_clock/0, 0).
 
 %% @doc start a new hybrid logical clock with a custom physical clock function.
 -spec start_link(ClockFun :: clock_fun(), MaxOffset :: non_neg_integer()) -> {ok, clock()}.
@@ -88,6 +91,9 @@ start_link(ClockFun, MaxOffset) ->
 -spec start_link(Name :: atom(), ClockFun :: clock_fun(), MaxOffset :: non_neg_integer()) -> {ok, clock()}.
 start_link(Name, ClockFun, MaxOffset) ->
   gen_server:start_link(({local, Name}), ?MODULE, [{ClockFun, MaxOffset}], []).
+
+-spec start() -> {ok, clock()}.
+start() -> start(fun physical_clock/0, 0).
 
 -spec start(ClockFun :: clock_fun(), MaxOffset :: non_neg_integer()) -> {ok, clock()}.
 start(ClockFun, MaxOffset) ->
@@ -235,6 +241,10 @@ handle_call(_Msg, _From, Clock) ->
 
 handle_cast(_Msg, Clock) -> {noreply, Clock}.
 
+
+
+%% -------------------
+%% internals
 
 update_clock(RT, #clock{ts=TS, maxoffset=MaxOffset} = Clock0) ->
   {Now, Clock1} = get_physclock(Clock0),
