@@ -62,7 +62,7 @@ timestamp() = #timestamp{}
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#equal-2">equal/2</a></td><td>compare if 2 timestamps are equal.</td></tr><tr><td valign="top"><a href="#get_maxoffset-1">get_maxoffset/1</a></td><td>returns the maximal offset allowed.</td></tr><tr><td valign="top"><a href="#handle_call-3">handle_call/3</a></td><td></td></tr><tr><td valign="top"><a href="#handle_cast-2">handle_cast/2</a></td><td></td></tr><tr><td valign="top"><a href="#init-1">init/1</a></td><td></td></tr><tr><td valign="top"><a href="#less-2">less/2</a></td><td>compare if one timestamps happen before the other.</td></tr><tr><td valign="top"><a href="#manual_clock-0">manual_clock/0</a></td><td>create a manually controlled physicl clock.</td></tr><tr><td valign="top"><a href="#manual_clock-1">manual_clock/1</a></td><td>create a manually controlled physicl clock and initialise it
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#equal-2">equal/2</a></td><td>compare if 2 timestamps are equal.</td></tr><tr><td valign="top"><a href="#get_maxoffset-1">get_maxoffset/1</a></td><td>returns the maximal offset allowed.</td></tr><tr><td valign="top"><a href="#less-2">less/2</a></td><td>compare if one timestamps happen before the other.</td></tr><tr><td valign="top"><a href="#manual_clock-0">manual_clock/0</a></td><td>create a manually controlled physicl clock.</td></tr><tr><td valign="top"><a href="#manual_clock-1">manual_clock/1</a></td><td>create a manually controlled physicl clock and initialise it
 with a default ts.</td></tr><tr><td valign="top"><a href="#now-1">now/1</a></td><td> returns a timestamp associated with an event from the local
 machine that may be sent to other members of the distributed network.</td></tr><tr><td valign="top"><a href="#physical_clock-0">physical_clock/0</a></td><td>timestamp in milliseconds.</td></tr><tr><td valign="top"><a href="#set_manual_clock-2">set_manual_clock/2</a></td><td>change the value of the manually controlled physicall clock.</td></tr><tr><td valign="top"><a href="#set_maxoffset-2">set_maxoffset/2</a></td><td>Sets the maximal offset from the physical clock that a call to
 Update may cause.</td></tr><tr><td valign="top"><a href="#start-0">start/0</a></td><td></td></tr><tr><td valign="top"><a href="#start-2">start/2</a></td><td></td></tr><tr><td valign="top"><a href="#start-3">start/3</a></td><td></td></tr><tr><td valign="top"><a href="#start_link-0">start_link/0</a></td><td>start a new hybrid logical clock with physical clock and maxoffset=0.</td></tr><tr><td valign="top"><a href="#start_link-2">start_link/2</a></td><td>start a new hybrid logical clock with a custom physical clock function.</td></tr><tr><td valign="top"><a href="#start_link-3">start_link/3</a></td><td>start a new hybrid logical clock with a name.</td></tr><tr><td valign="top"><a href="#stop-1">stop/1</a></td><td>stop a clock.</td></tr><tr><td valign="top"><a href="#timestamp-1">timestamp/1</a></td><td>return a copy of the clock timestamp without adjusting it.</td></tr><tr><td valign="top"><a href="#update-2">update/2</a></td><td>takes a hybrid timestamp, usually originating from an event
@@ -95,24 +95,6 @@ get_maxoffset(Clock::<a href="#type-clock">clock()</a>) -&gt; non_neg_integer()
 
 returns the maximal offset allowed.
 A value of 0 means offset checking is disabled.
-
-<a name="handle_call-3"></a>
-
-### handle_call/3 ###
-
-`handle_call(Msg, From, Clock) -> any()`
-
-<a name="handle_cast-2"></a>
-
-### handle_cast/2 ###
-
-`handle_cast(Msg, Clock) -> any()`
-
-<a name="init-1"></a>
-
-### init/1 ###
-
-`init(X1) -> any()`
 
 <a name="less-2"></a>
 

@@ -205,10 +205,11 @@ equal(_, _) -> false.
 %% -------------------
 %% gen_server callbacks
 
+%% @private
 init([{ClockFun, MaxOffset}]) ->
   {ok, #clock{phys_clock=ClockFun, ts=#timestamp{}, maxoffset=MaxOffset}}.
 
-
+%% @private
 handle_call(maxoffset, _From, Clock = #clock{maxoffset=MaxOffset}) ->
   {reply, MaxOffset, Clock};
 
@@ -239,6 +240,7 @@ handle_call(timestamp, _From, Clock = #clock{ts = TS}) ->
 handle_call(_Msg, _From, Clock) ->
   {reply, bad_call, Clock}.
 
+%% @private
 handle_cast(_Msg, Clock) -> {noreply, Clock}.
 
 
