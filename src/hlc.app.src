@@ -10,6 +10,6 @@
   {env, []},
 
   {maintainers, ["Benoit Chesneau"]},
-  {license, ["MPL2"]},
+  {licenses, ["MPL2"]},
   {links, [{"Github", "https://github.com/barrel-db/hlc"}]}
  ]}.
