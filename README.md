@@ -4,7 +4,7 @@
 
 Copyright (c) 2014-2015 Benoît Chesneau.
 
-__Version:__ 3.0.0
+__Version:__ 3.0.1
 
 hlc implements the Hybrid Logical Clock outlined in [Logical Physical Clocks
 and Consistent Snapshots in Globally Distributed
@@ -20,7 +20,7 @@ Databases](http://www.cse.buffalo.edu/tech-reports/2014-04.pdf).
 
 ## Documentation
 
-Full doc is available in the [`hlc`](http://github.com/barrel-db/hlc/blob/master/doc/hlc.md) module.
+Full doc is available in the [`hlc`](http://gitlab.com/barrel-db/hlc/blob/master/doc/hlc.md) module.
 
 ## Example of usage
 
@@ -112,6 +112,6 @@ rebar3 eunit
 
 
 <table width="100%" border="0" summary="list of modules">
-<tr><td><a href="http://github.com/barrel-db/hlc/blob/master/doc/hlc.md" class="module">hlc</a></td></tr>
-<tr><td><a href="http://github.com/barrel-db/hlc/blob/master/doc/hlc_harness.md" class="module">hlc_harness</a></td></tr></table>
+<tr><td><a href="http://gitlab.com/barrel-db/hlc/blob/master/doc/hlc.md" class="module">hlc</a></td></tr>
+<tr><td><a href="http://gitlab.com/barrel-db/hlc/blob/master/doc/hlc_harness.md" class="module">hlc_harness</a></td></tr></table>
 

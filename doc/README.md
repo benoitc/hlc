@@ -4,7 +4,7 @@
 
 Copyright (c) 2014-2015 Benoît Chesneau.
 
-__Version:__ 3.0.0
+__Version:__ 3.0.1
 
 hlc implements the Hybrid Logical Clock outlined in [Logical Physical Clocks
 and Consistent Snapshots in Globally Distributed
