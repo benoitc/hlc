@@ -39,8 +39,6 @@ Return a timestamp for the current time:
 {timestamp,1511564016030,0}
 '''
 
-
-
 > Note: by default it using `erlang:system_time(millisecond)' to get the physical time.
 
 You can update the current clock from the members of the cluster using `hlc:update/2'.
