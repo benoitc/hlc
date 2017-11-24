@@ -70,15 +70,16 @@ To test if they are equal use `hlc:ts_equal/2`.
 
 You can check the performance using the module `hlc_harness`:
 
-```erlang
-> hlc_harness:timed_generate(10000).
+```
+1> hlc_harness:timed_generate(10000).
 generating timestamp: 0.035 s
 ...
-> hlc_harness:timed_generate(100000).
+2> hlc_harness:timed_generate(100000).
 generating timestamp: 0.295 s
 ...
-> hlc_harness:timed_generate(1000000).
-generating timestamp: 2.586 s`''
+3> hlc_harness:timed_generate(1000000).
+generating timestamp: 2.586 s
+```
 
 ## Ownership and License
 
@@ -102,7 +103,7 @@ Under C4.1 process, you are more than welcome to help us by:
 To  run the test suite:
 
 ```
-make test
+rebar3 eunit
 ```
 
 
