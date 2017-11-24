@@ -15,7 +15,7 @@ Databases](http://www.cse.buffalo.edu/tech-reports/2014-04.pdf).
 > degenerate cases causing timestamps to diverge from wall clock time. It's
 > usefull to distribute transactions or such things.
 
-[![Build Status](https://travis-ci.org/barrel-db/hlc.png?branch=master)](https://travis-ci.org/barrel-db/hlc)
+[![Build Status](https://gitlab.com/barrel-db/barrel-platform/badges/master/build.svg)](https://gitlab.com/barrel-db/barrel-platform/commits/master)
 [![Hex pm](http://img.shields.io/hexpm/v/hlc.svg?style=flat)](https://hex.pm/packages/hlc)
 
 ## Documentation
