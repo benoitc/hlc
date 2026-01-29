@@ -39,12 +39,15 @@
 -export([
   init/1,
   handle_call/3,
-  handle_cast/2
+  handle_cast/2,
+  handle_info/2,
+  terminate/2,
+  code_change/3
 ]).
 
 -export([physical_clock/0]).
 -export([manual_clock/0, manual_clock/1,
-         set_manual_clock/2]).
+         set_manual_clock/2, stop_manual_clock/1]).
 
 -include("hlc.hrl").
 
@@ -90,7 +93,7 @@ start_link(ClockFun, MaxOffset) ->
 %% @doc start a new hybrid logical clock with a name. Clocks are always local
 -spec start_link(Name :: atom(), ClockFun :: clock_fun(), MaxOffset :: non_neg_integer()) -> {ok, clock()}.
 start_link(Name, ClockFun, MaxOffset) ->
-  gen_server:start_link(({local, Name}), ?MODULE, [{ClockFun, MaxOffset}], []).
+  gen_server:start_link({local, Name}, ?MODULE, [{ClockFun, MaxOffset}], []).
 
 -spec start() -> {ok, clock()}.
 start() -> start(fun physical_clock/0, 0).
@@ -112,7 +115,7 @@ stop(Clock) -> gen_server:stop(Clock).
 %% machine that may be sent to other members of the distributed network.
 %% This is the counterpart of Update, which is passed a timestamp
 %% received from another member of the distributed network.
--spec now(clock()) -> {timestamp(), clock()}.
+-spec now(clock()) -> timestamp().
 now(Clock) ->
   gen_server:call(Clock, now).
 
@@ -124,7 +127,7 @@ now(Clock) ->
 %% case the state of the clock will not have been  altered. To timestamp
 %% events of local origin, use Now instead.
 -spec update(clock(), timestamp()) ->
-  {ok, timestamp(), clock()}
+  {ok, timestamp()}
   | {timeahead, timestamp()}.
 update(Clock, RT) ->
   gen_server:call(Clock, {update, RT}).
@@ -159,12 +162,12 @@ get_maxoffset(Clock) ->
 physical_clock() ->
   erlang:system_time(millisecond).
 
-%% @doc create a manually controlled physicl clock
+%% @doc create a manually controlled physical clock
 -spec manual_clock() -> {pid(), fun()}.
 manual_clock() ->
   manual_clock(0).
 
-%% @doc create a manually controlled physicl clock and initialise it
+%% @doc create a manually controlled physical clock and initialise it
 %% with a default ts.
 -spec manual_clock(integer()) -> {pid(), fun()}.
 manual_clock(TS0) ->
@@ -178,10 +181,16 @@ manual_clock(TS0) ->
             end,
   {Pid, UserFun}.
 
-%% @doc change the value of the manually controlled physicall clock.
+%% @doc change the value of the manually controlled physical clock.
 -spec set_manual_clock(pid(), integer()) -> ok.
 set_manual_clock(Pid, TS) ->
   Pid ! {update_ts, TS},
+  ok.
+
+%% @doc stop a manually controlled physical clock.
+-spec stop_manual_clock(pid()) -> ok.
+stop_manual_clock(Pid) ->
+  Pid ! stop,
   ok.
 
 
@@ -220,7 +229,7 @@ handle_call(now, _From, Clock0 = #clock{ts=TS}) ->
   {Now, Clock1} = get_physclock(Clock0),
   NewTS = if
             TS#timestamp.wall_time >= Now ->
-              TS#timestamp{logical=TS#timestamp.logical + 1};
+              TS#timestamp{logical=incr_logical(TS#timestamp.logical)};
             true ->
               TS#timestamp{wall_time=Now, logical=0}
           end,
@@ -243,10 +252,29 @@ handle_call(_Msg, _From, Clock) ->
 %% @private
 handle_cast(_Msg, Clock) -> {noreply, Clock}.
 
+%% @private
+handle_info(_Msg, Clock) -> {noreply, Clock}.
+
+%% @private
+terminate(_Reason, _Clock) -> ok.
+
+%% @private
+code_change(_OldVsn, Clock, _Extra) -> {ok, Clock}.
 
 
 %% -------------------
 %% internals
+
+%% Maximum logical counter value (2^31 - 1)
+-define(MAX_LOGICAL, 16#7FFFFFFF).
+
+%% @doc Increment logical counter with overflow protection.
+%% Raises error if counter would overflow.
+-spec incr_logical(non_neg_integer()) -> non_neg_integer().
+incr_logical(Logical) when Logical >= ?MAX_LOGICAL ->
+  error({logical_overflow, Logical});
+incr_logical(Logical) ->
+  Logical + 1.
 
 update_clock(RT, #clock{ts=TS, maxoffset=MaxOffset} = Clock0) ->
   {Now, Clock1} = get_physclock(Clock0),
@@ -267,24 +295,24 @@ update_clock(RT, #clock{ts=TS, maxoffset=MaxOffset} = Clock0) ->
     false when RTWalltime > TSWalltime ->
       if
         ((MaxOffset > 0) and (Offset > MaxOffset)) ->
-          _ =  error_logger:info_msg(
-            "~s, Remote wall time offsets from localphysical clock: %p (%p ahead)",
+          _ = error_logger:info_msg(
+            "~s: remote wall time offset from local physical clock: ~p (~p ahead)~n",
             [?MODULE_STRING, RTWalltime, Offset]
           ),
           {{timeahead, TS}, Clock1};
         true ->
           NewTS = TS#timestamp{wall_time=RTWalltime,
-                               logical = RTLogical +1},
+                               logical = incr_logical(RTLogical)},
           {{ok, NewTS}, Clock1#clock{ts=NewTS}}
       end;
     false when TSWalltime > RTWalltime ->
-      NewTS = TS#timestamp{logical=TSLogical +1},
+      NewTS = TS#timestamp{logical=incr_logical(TSLogical)},
       {{ok, NewTS}, Clock1#clock{ts=NewTS}};
     false ->
       TSLogical1 = if RTLogical > TSLogical -> RTLogical;
                      true -> TSLogical
                    end,
-      NewTS = TS#timestamp{logical=TSLogical1 +1},
+      NewTS = TS#timestamp{logical=incr_logical(TSLogical1)},
       {{ok, NewTS}, Clock1#clock{ts=NewTS}}
   end.
 
@@ -318,7 +346,9 @@ manual_clock_loop(Last) ->
       From ! {new_ts, Last},
       manual_clock_loop(Last);
     {update_ts, TS} ->
-      manual_clock_loop(TS)
+      manual_clock_loop(TS);
+    stop ->
+      ok
   end.
 
 -ifdef(TEST).
