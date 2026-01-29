@@ -9,6 +9,11 @@
 - add missing gen_server callbacks (handle_info, terminate, code_change)
 - add stop_manual_clock/1 to prevent process leak
 - add logical counter overflow protection
+- switch from edown to ex_doc for documentation
+- extract tests to test/ folder
+- add xref and dialyzer configuration
+- add GitHub CI workflow (OTP 25-28)
+- migrate from GitLab to GitHub
 
 ## 3.0.1
 
