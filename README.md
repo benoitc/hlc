@@ -1,117 +1,132 @@
-
-
-# hlc - Hybrid Logical Clock in Erlang. #
-
-Copyright (c) 2014-2015 Benoît Chesneau.
-
-__Version:__ 3.0.1
-
-hlc implements the Hybrid Logical Clock outlined in [Logical Physical Clocks
-and Consistent Snapshots in Globally Distributed
-Databases](http://www.cse.buffalo.edu/tech-reports/2014-04.pdf).
-
-> Note: you can use it to have timestamps that are are a combination of both a
-> physical and a logical component to support monotonic increments without
-> degenerate cases causing timestamps to diverge from wall clock time. It's
-> usefull to distribute transactions or such things.
+# hlc - Hybrid Logical Clock in Erlang
 
 [![Build Status](https://gitlab.com/barrel-db/hlc/badges/master/build.svg)](https://gitlab.com/barrel-db/hlc/commits/master)
-[![Hex pm](http://img.shields.io/hexpm/v/hlc.svg?style=flat)](https://hex.pm/packages/hlc)
+[![Hex.pm](https://img.shields.io/hexpm/v/hlc.svg?style=flat)](https://hex.pm/packages/hlc)
 
-## Documentation
+hlc implements the Hybrid Logical Clock outlined in [Logical Physical Clocks and Consistent Snapshots in Globally Distributed Databases](http://www.cse.buffalo.edu/tech-reports/2014-04.pdf).
 
-Full doc is available in the [`hlc`](http://gitlab.com/barrel-db/hlc/blob/master/doc/hlc.md) module.
+Hybrid logical clocks provide timestamps that combine both physical and logical components to support monotonic increments without degenerate cases causing timestamps to diverge from wall clock time. This is useful for distributed transactions and ordering events across a cluster.
 
-## Example of usage
+## Installation
 
-Create a logical clock using `hlc:new/0`:
+Add `hlc` to your `rebar.config` dependencies:
 
+```erlang
+{deps, [
+    {hlc, "3.0.2"}
+]}.
 ```
+
+Or with mix:
+
+```elixir
+{:hlc, "~> 3.0"}
+```
+
+## Usage
+
+### Creating a Clock
+
+```erlang
 1> {ok, C} = hlc:start_link().
-{ok,<0.158.0>}
+{ok, <0.158.0>}
 ```
+
+### Getting Timestamps
+
 Return a timestamp for the current time:
 
-```
+```erlang
 2> Now = hlc:now(C).
-{timestamp,1511564016030,0}
+{timestamp, 1511564016030, 0}
 ```
 
-> Note: by default it using `erlang:system_time(millisecond)` to get the physical time.
+By default, `erlang:system_time(millisecond)` is used for the physical time.
 
-You can update the current clock from the members of the cluster using `hlc:update/2`.
+### Updating from Remote Events
 
-> :heavy_exclamation_mark: A clock is not locked, you need to make sure that only one user can update it at a time
-> using the `now/1` or `update/2` functions.
+Update the clock when receiving timestamps from other cluster members:
 
-### Comparaison
-
-Compare 2 clocks using `hlc:ts_less/2` or `hlc:ts_equal/2`:
-
-Ex, compare if A is inferior to B:
-
+```erlang
+3> {ok, UpdatedTS} = hlc:update(C, RemoteTimestamp).
 ```
+
+> **Note:** Clocks are not locked internally. Ensure only one process updates a clock at a time using `now/1` or `update/2`.
+
+### Comparing Timestamps
+
+Compare timestamps using `hlc:less/2` or `hlc:equal/2`:
+
+```erlang
 {MClock, MClockFun} = hlc:manual_clock(),
 {ok, C} = hlc:start_link(MClockFun, 0),
 
 A = hlc:timestamp(C),
 B = hlc:timestamp(C),
-
-?assert(A =:= B),
+true = hlc:equal(A, B),
 
 hlc:set_manual_clock(MClock, 1),
 B1 = hlc:now(C),
 true = hlc:less(A, B1).
 ```
 
-To test if they are equal use `hlc:ts_equal/2`.
+## API Reference
+
+### Clock Management
+
+- `hlc:start_link/0` - Start a clock with default physical clock
+- `hlc:start_link/2` - Start with custom clock function and max offset
+- `hlc:start_link/3` - Start with a registered name
+- `hlc:stop/1` - Stop a clock
+
+### Timestamps
+
+- `hlc:now/1` - Get current timestamp (advances clock)
+- `hlc:timestamp/1` - Get current timestamp (does not advance clock)
+- `hlc:update/2` - Update clock from remote timestamp
+
+### Comparison
+
+- `hlc:less/2` - Check if timestamp A is before B
+- `hlc:equal/2` - Check if two timestamps are equal
+
+### Configuration
+
+- `hlc:get_maxoffset/1` - Get maximum allowed clock offset
+- `hlc:set_maxoffset/2` - Set maximum allowed clock offset
+
+## Testing with Manual Clocks
+
+For testing, you can create a manually controlled clock:
+
+```erlang
+{MClock, MClockFun} = hlc:manual_clock(),
+{ok, C} = hlc:start_link(MClockFun, 0),
+hlc:set_manual_clock(MClock, 42),
+hlc:stop_manual_clock(MClock).  % Clean up when done
+```
 
 ## Performance
 
-You can check the performance using the module `hlc_harness`:
+Benchmark using `hlc_harness`:
 
-```
-1> hlc_harness:timed_generate(10000).
-generating timestamp: 0.035 s
-...
-2> hlc_harness:timed_generate(100000).
-generating timestamp: 0.295 s
-...
-3> hlc_harness:timed_generate(1000000).
+```erlang
+1> hlc_harness:timed_generate(1000000).
 generating timestamp: 2.586 s
 ```
 
-## Ownership and License
+## License
 
-The contributors are listed in AUTHORS. This project uses the MPL v2
-license, see LICENSE.
+Copyright (c) 2014-2026 Benoit Chesneau.
 
-hlc uses the [C4.1 (Collective Code Construction
-Contract)](http://rfc.zeromq.org/spec:22) process for contributions.
+This project uses the MPL v2 license. See [LICENSE](LICENSE) for details.
 
-## Development
+## Contributing
 
-Under C4.1 process, you are more than welcome to help us by:
+Contributions welcome! Please submit issues and pull requests on [GitLab](https://gitlab.com/barrel-db/hlc).
 
-* join the discussion over anything from design to code style try out
-* and [submit issue reports](https://github.com/refuge/hlc/issues/new)
-* or feature requests pick a task in
-* [issues](https://github.com/refuge/hlc/issues) and get it done fork
-* the repository and have your own fixes send us pull requests and even
-* star this project ^_^
-
-To  run the test suite:
+To run the test suite:
 
 ```
 rebar3 eunit
 ```
-
-
-
-## Modules ##
-
-
-<table width="100%" border="0" summary="list of modules">
-<tr><td><a href="http://gitlab.com/barrel-db/hlc/blob/master/doc/hlc.md" class="module">hlc</a></td></tr>
-<tr><td><a href="http://gitlab.com/barrel-db/hlc/blob/master/doc/hlc_harness.md" class="module">hlc_harness</a></td></tr></table>
-
