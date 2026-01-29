@@ -11,5 +11,5 @@
 
   {maintainers, ["Benoit Chesneau"]},
   {licenses, ["MPL2"]},
-  {links, [{"Gitlab", "https://gitlab.com/barrel-db/hlc"}]}
+  {links, [{"GitHub", "https://github.com/benoitc/hlc"}]}
  ]}.
